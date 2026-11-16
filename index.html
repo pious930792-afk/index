@@ -1,0 +1,1409 @@
+<!DOCTYPE html>
+<html lang="fa" dir="rtl">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>سلام دنیای کد</title>
+
+<style>
+  :root {
+    --c1:#6a11cb; --c2:#2575fc; --c3:#ff2e93;
+    --bg:#05050f; --txt:#fff; --muted:#a9adc7;
+    --glass:rgba(255,255,255,.05); --border:rgba(255,255,255,.12);
+  }
+  * { margin:0; padding:0; box-sizing:border-box; }
+  html { scroll-behavior: smooth; }
+  body { font-family:"Vazirmatn",Tahoma,sans-serif; background:var(--bg); color:var(--txt); min-height:100vh; overflow-x:hidden; }
+
+  .bg-orbs { position:fixed; inset:0; pointer-events:none; z-index:-2; overflow:hidden; filter:blur(60px); }
+  .orb { position:absolute; border-radius:50%; opacity:.55; mix-blend-mode:screen; }
+  .orb-1 { width:500px;height:500px;background:radial-gradient(circle,#6a11cb,transparent 70%);top:-100px;left:-100px;animation:orb1 22s ease-in-out infinite alternate; }
+  .orb-2 { width:600px;height:600px;background:radial-gradient(circle,#2575fc,transparent 70%);top:30%;right:-200px;animation:orb2 28s ease-in-out infinite alternate; }
+  .orb-3 { width:450px;height:450px;background:radial-gradient(circle,#ff2e93,transparent 70%);bottom:-150px;left:30%;animation:orb3 24s ease-in-out infinite alternate; }
+  @keyframes orb1 { to { transform: translate(150px,100px) scale(1.2); } }
+  @keyframes orb2 { to { transform: translate(-150px,-120px) scale(1.15); } }
+  @keyframes orb3 { to { transform: translate(100px,-150px) scale(1.25); } }
+
+  .particles { position:fixed; inset:0; pointer-events:none; z-index:-1; overflow:hidden; }
+  .particle { position:absolute; border-radius:50%; background:linear-gradient(135deg,#6a11cb,#2575fc,#ff2e93); animation:floatUp linear infinite; box-shadow:0 0 10px rgba(106,17,203,.7); }
+  @keyframes floatUp {
+    0% { transform:translate(0,0); opacity:0; }
+    10% { opacity:1; }
+    90% { opacity:1; }
+    100% { transform:translate(80px,-110vh); opacity:0; }
+  }
+
+  .hero { min-height:100vh; padding:40px 24px; display:grid; place-items:center; }
+  .hero-grid { width:100%; max-width:1200px; display:grid; grid-template-columns:1fr 1.15fr; gap:40px; align-items:start; }
+  @media (max-width:900px) { .hero-grid { grid-template-columns:1fr; gap:30px; } }
+  .hero-text { text-align:right; padding-top:30px; }
+  .badge { display:inline-block; padding:8px 20px; border-radius:999px; font-size:.85rem; color:#dcd6ff; background:var(--glass); border:1px solid var(--border); backdrop-filter:blur(12px); animation:badgeFloat 3s ease-in-out infinite; }
+  @keyframes badgeFloat {
+    0%,100% { transform:translateY(0); box-shadow:0 0 0 rgba(106,17,203,0); }
+    50% { transform:translateY(-4px); box-shadow:0 0 24px rgba(106,17,203,.4); }
+  }
+  .hero-title { font-size:clamp(2.5rem,7vw,5rem); font-weight:900; line-height:1.3; margin:20px 0; display:flex; flex-wrap:wrap; gap:16px; align-items:baseline; }
+  .wave { display:inline-block; animation:wave 3s ease-in-out infinite; }
+  @keyframes wave {
+    0%,100% { transform:translateY(0) rotate(0); }
+    25% { transform:translateY(-8px) rotate(-3deg); }
+    75% { transform:translateY(8px) rotate(3deg); }
+  }
+  .grad { background:linear-gradient(90deg,#ff2e93,#6a11cb,#2575fc,#ff2e93); background-size:300% 100%; -webkit-background-clip:text; background-clip:text; color:transparent; animation:gradMove 5s linear infinite; filter:drop-shadow(0 0 25px rgba(106,17,203,.5)); }
+  @keyframes gradMove { to { background-position:300% 0; } }
+  .hero-sub { color:var(--muted); font-size:clamp(.95rem,2vw,1.1rem); line-height:2; max-width:480px; margin-bottom:20px; }
+  .feature-list { display:flex; flex-wrap:wrap; gap:12px; margin-top:24px; }
+  .feature-chip { display:inline-flex; align-items:center; gap:6px; padding:8px 16px; border-radius:999px; font-size:.82rem; background:var(--glass); border:1px solid var(--border); color:#dcd6ff; transition:transform .25s, background .25s; }
+  .feature-chip:hover { transform:translateY(-3px); background:rgba(255,255,255,.12); }
+
+  /* ============ ادیتور ============ */
+  .editor-card {
+    position:relative;
+    background:linear-gradient(145deg,rgba(25,25,48,.85),rgba(15,15,32,.9));
+    border:1px solid var(--border);
+    border-radius:22px;
+    padding:18px;
+    backdrop-filter:blur(20px);
+    box-shadow:0 25px 60px rgba(0,0,0,.5),0 0 40px rgba(106,17,203,.2);
+    transition: box-shadow .4s ease, transform .4s ease;
+  }
+  .editor-card.growing {
+    animation: cardGrow .7s ease;
+  }
+  @keyframes cardGrow {
+    0%   { transform: scale(1); }
+    40%  { transform: scale(1.008); box-shadow: 0 25px 60px rgba(0,0,0,.5), 0 0 70px rgba(37,117,252,.55); }
+    100% { transform: scale(1); }
+  }
+  .editor-card::before { content:""; position:absolute; inset:-1px; border-radius:22px; padding:1px; background:linear-gradient(135deg,transparent,rgba(37,117,252,.5),transparent); -webkit-mask:linear-gradient(#000 0 0) content-box,linear-gradient(#000 0 0); -webkit-mask-composite:xor; mask-composite:exclude; opacity:.6; pointer-events:none; }
+
+  .editor-head { display:flex; align-items:center; justify-content:space-between; gap:10px; flex-wrap:wrap; margin-bottom:12px; }
+  .editor-head > span:first-child { font-weight:700; font-size:.95rem; }
+  .editor-tools { display:flex; gap:6px; align-items:center; }
+
+  .load-file-btn {
+    font-family:inherit; font-size:.78rem; font-weight:700;
+    color:#fff; background:linear-gradient(135deg,#6a11cb,#2575fc);
+    border:none; padding:8px 14px; border-radius:10px; cursor:pointer;
+    display:inline-flex; align-items:center; gap:5px;
+    transition:transform .2s, box-shadow .2s;
+    box-shadow:0 4px 14px rgba(37,117,252,.35);
+  }
+  .load-file-btn:hover { transform:translateY(-2px); box-shadow:0 8px 20px rgba(37,117,252,.5); }
+  .load-file-btn:active { transform:translateY(0) scale(.97); }
+
+  .mini-samples { display:flex; gap:6px; }
+  .mini-btn { width:34px; height:34px; border-radius:10px; border:1px solid var(--border); background:var(--glass); cursor:pointer; font-size:1rem; display:grid; place-items:center; transition:transform .2s, background .2s; }
+  .mini-btn:hover { transform:scale(1.15) rotate(6deg); background:rgba(37,117,252,.25); }
+
+  .detect-badge {
+    display:none;
+    margin-bottom:10px;
+    padding:8px 14px;
+    border-radius:12px;
+    font-size:.8rem;
+    font-weight:700;
+    align-items:center;
+    gap:8px;
+    background:rgba(255,255,255,.06);
+    border:1px solid var(--border);
+    animation:badgeIn .4s cubic-bezier(.2,.9,.3,1.4);
+  }
+  .detect-badge.show { display:inline-flex; }
+  .detect-badge .dot {
+    width:8px; height:8px; border-radius:50%;
+    animation:dotPulse 1.6s ease-in-out infinite;
+  }
+  @keyframes badgeIn {
+    from { opacity:0; transform:translateX(-10px) scale(.9); }
+    to { opacity:1; transform:translateX(0) scale(1); }
+  }
+  @keyframes dotPulse {
+    0%,100% { opacity:1; }
+    50% { opacity:.5; }
+  }
+
+  /* ==== تکست‌اریای خودتنظیم ==== */
+  #codeInput {
+    width:100%;
+    min-height:280px;
+    height:280px;
+    resize:none;
+    overflow-y:hidden;
+    direction:ltr;
+    text-align:left;
+    font-family:'Courier New', monospace;
+    font-size:.85rem;
+    line-height:1.7;
+    color:#e9e9ff;
+    background:#070712;
+    border:1px solid var(--border);
+    border-radius:14px;
+    padding:14px;
+    outline:none;
+    transition:
+      border-color .25s,
+      box-shadow .25s,
+      height .35s cubic-bezier(.2,.9,.3,1);
+  }
+  #codeInput:focus { border-color:rgba(37,117,252,.8); box-shadow:0 0 0 3px rgba(37,117,252,.2),0 0 24px rgba(37,117,252,.15); }
+
+  .editor-actions { display:flex; align-items:center; gap:10px; margin-top:12px; flex-wrap:wrap; }
+  .btn-run { flex:1; min-width:140px; font-family:inherit; font-weight:700; font-size:.95rem; color:#fff; padding:14px 24px; border-radius:14px; cursor:pointer; border:none; background:linear-gradient(135deg,#16a34a,#22c55e); box-shadow:0 8px 22px rgba(34,197,94,.3); transition:transform .2s, box-shadow .2s; position:relative; overflow:hidden; }
+  .btn-run:hover { transform:translateY(-2px); box-shadow:0 12px 32px rgba(34,197,94,.5); }
+  .btn-run::after { content:""; position:absolute; top:0; left:-100%; width:50%; height:100%; background:linear-gradient(120deg,transparent,rgba(255,255,255,.4),transparent); transform:skewX(-20deg); animation:shine 3s infinite; }
+  @keyframes shine { 0% { left:-100%; } 60%,100% { left:150%; } }
+  .btn-clear { font-family:inherit; font-weight:600; font-size:.85rem; color:#fff; padding:14px 18px; border-radius:14px; cursor:pointer; border:1px solid var(--border); background:var(--glass); transition:background .2s, border-color .2s; }
+  .btn-clear:hover { background:rgba(255,46,147,.15); border-color:rgba(255,46,147,.4); color:#ff8cc3; }
+  .char-count {
+    font-size:.75rem; color:var(--muted); margin-right:auto;
+    direction:ltr; display:flex; gap:8px; flex-wrap:wrap;
+    font-family: monospace;
+  }
+  .char-count .stat { display:inline-flex; align-items:center; gap:3px; }
+  .char-count .stat .v { color:#b8d9ff; font-weight:700; }
+
+  .section { padding:60px 24px; max-width:1200px; margin:0 auto; }
+  .section-title { font-size:clamp(1.4rem,4vw,2.2rem); margin-bottom:24px; display:flex; align-items:center; gap:12px; }
+  .section-title::before { content:""; width:6px; height:32px; border-radius:3px; background:linear-gradient(180deg,#6a11cb,#2575fc,#ff2e93); box-shadow:0 0 20px rgba(106,17,203,.6); }
+
+  .iframe-wrap { border-radius:20px; overflow:hidden; border:1px solid var(--border); box-shadow:0 25px 60px rgba(0,0,0,.5),0 0 40px rgba(106,17,203,.15); background:#fff; }
+  iframe { width:100%; height:70vh; min-height:400px; border:none; display:block; background:#fff; }
+  .output-empty { display:grid; place-items:center; min-height:300px; color:var(--muted); background:#0d0d1a; font-size:.95rem; text-align:center; padding:40px; }
+  .output-empty .icon { font-size:3rem; margin-bottom:12px; opacity:.5; animation:float 3s ease-in-out infinite; }
+  @keyframes float { 0%,100% { transform:translateY(0); } 50% { transform:translateY(-10px); } }
+
+  .files-section { padding:60px 24px 100px; max-width:1100px; margin:0 auto; }
+  .files-intro { color:var(--muted); font-size:.92rem; line-height:1.9; margin-bottom:24px; }
+
+  .drop-zone {
+    position:relative;
+    display:block;
+    border:2px dashed rgba(120,180,255,.4);
+    border-radius:22px;
+    padding:50px 24px;
+    text-align:center;
+    cursor:pointer;
+    background:linear-gradient(145deg, rgba(25,25,48,.6), rgba(15,15,32,.7));
+    backdrop-filter:blur(12px);
+    transition:border-color .3s, background .3s, transform .3s, box-shadow .3s;
+    overflow:hidden;
+  }
+  .drop-zone::before { content:""; position:absolute; inset:0; background:radial-gradient(circle at 50% 0%, rgba(37,117,252,.15), transparent 60%); opacity:0; transition:opacity .4s; pointer-events:none; }
+  .drop-zone:hover { border-color:rgba(120,180,255,.8); transform:translateY(-2px); box-shadow:0 15px 40px rgba(0,0,0,.4),0 0 30px rgba(37,117,252,.2); }
+  .drop-zone:hover::before { opacity:1; }
+  .drop-zone.dragover { border-color:#22c55e; background:linear-gradient(145deg, rgba(22,163,74,.2), rgba(15,15,32,.9)); box-shadow:0 0 40px rgba(34,197,94,.4); transform:scale(1.01); }
+
+  .drop-zone input[type="file"] {
+    position:absolute; inset:0;
+    opacity:0; cursor:pointer;
+    width:100%; height:100%;
+  }
+
+  .drop-icon { font-size:3.5rem; margin-bottom:14px; animation:dropFloat 2.5s ease-in-out infinite; display:inline-block; }
+  @keyframes dropFloat { 0%,100% { transform:translateY(0) rotate(-3deg); } 50% { transform:translateY(-10px) rotate(3deg); } }
+  .drop-text { font-size:1.05rem; font-weight:700; margin-bottom:6px; }
+  .drop-hint { font-size:.82rem; color:var(--muted); }
+
+  .files-grid { display:grid; gap:16px; margin-top:26px; grid-template-columns:repeat(auto-fill, minmax(230px, 1fr)); }
+  .file-card { background:linear-gradient(145deg, rgba(30,30,55,.85), rgba(18,18,35,.9)); border:1px solid var(--border); border-radius:18px; padding:18px; display:flex; flex-direction:column; gap:12px; cursor:pointer; position:relative; transition:transform .3s, box-shadow .3s, border-color .3s; animation:fileIn .5s cubic-bezier(.2,.9,.3,1.2) backwards; }
+  @keyframes fileIn { from { opacity:0; transform:scale(.9) translateY(20px); } to { opacity:1; transform:scale(1) translateY(0); } }
+  .file-card:hover { transform:translateY(-5px); border-color:rgba(120,180,255,.5); box-shadow:0 15px 35px rgba(0,0,0,.5),0 0 24px rgba(37,117,252,.25); }
+  .file-card::before { content:"👁 باز کن"; position:absolute; top:10px; left:10px; font-size:10px; padding:3px 9px; background:rgba(0,20,40,.7); color:#8fd4ff; border:1px solid rgba(120,220,255,.4); border-radius:999px; opacity:0; transform:translateY(-4px); transition:opacity .3s, transform .3s; pointer-events:none; }
+  .file-card:hover::before { opacity:1; transform:translateY(0); }
+
+  .file-top { display:flex; align-items:center; gap:12px; }
+  .file-icon { width:48px; height:48px; border-radius:12px; display:grid; place-items:center; font-size:1.6rem; background:linear-gradient(135deg, rgba(106,17,203,.25), rgba(37,117,252,.25)); border:1px solid rgba(120,180,255,.25); flex-shrink:0; }
+  .file-info { flex:1; min-width:0; }
+  .file-name { font-weight:700; font-size:.92rem; margin-bottom:4px; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; direction:ltr; text-align:right; }
+  .file-meta { font-size:.75rem; color:var(--muted); display:flex; gap:8px; flex-wrap:wrap; }
+  .file-meta span { direction:ltr; }
+
+  .file-actions { display:flex; gap:6px; }
+  .file-load, .file-delete { font-family:inherit; font-size:.72rem; font-weight:600; padding:5px 10px; border-radius:999px; cursor:pointer; transition:background .2s, border-color .2s; }
+  .file-load { color:#b8d9ff; background:rgba(37,117,252,.15); border:1px solid rgba(37,117,252,.4); }
+  .file-load:hover { background:rgba(37,117,252,.3); }
+  .file-delete { color:#ffb3b3; background:rgba(255,60,60,.1); border:1px solid rgba(255,80,80,.3); }
+  .file-delete:hover { background:rgba(255,60,60,.25); border-color:rgba(255,80,80,.7); }
+
+  .files-empty { grid-column:1 / -1; text-align:center; padding:40px 20px; color:var(--muted); font-size:.9rem; }
+
+  .preview-overlay { position:fixed; inset:0; z-index:1000; background:rgba(0,5,15,.85); backdrop-filter:blur(10px); display:none; align-items:center; justify-content:center; padding:20px; opacity:0; transition:opacity .3s; }
+  .preview-overlay.open { display:flex; opacity:1; }
+  .preview-box { width:100%; max-width:1100px; max-height:92vh; background:linear-gradient(155deg, rgba(22,22,42,.98), rgba(12,12,26,.99)); border:1px solid rgba(120,180,255,.3); border-radius:20px; overflow:hidden; display:flex; flex-direction:column; transform:scale(.92); opacity:0; transition:transform .35s cubic-bezier(.2,.9,.3,1.3), opacity .3s; box-shadow:0 30px 80px rgba(0,0,0,.7),0 0 50px rgba(37,117,252,.2); }
+  .preview-overlay.open .preview-box { transform:scale(1); opacity:1; }
+  .preview-head { display:flex; align-items:center; justify-content:space-between; padding:16px 20px; border-bottom:1px solid var(--border); background:rgba(0,0,0,.3); flex-shrink:0; gap:10px; }
+  .preview-name { font-weight:700; font-size:.95rem; direction:ltr; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
+  .preview-actions { display:flex; gap:8px; flex-wrap:wrap; }
+  .preview-btn { font-family:inherit; font-size:.8rem; padding:7px 14px; border-radius:999px; cursor:pointer; border:1px solid var(--border); background:var(--glass); color:#dcd6ff; transition:background .2s; }
+  .preview-btn:hover { background:rgba(255,255,255,.15); }
+  .preview-btn.primary { background:linear-gradient(135deg,#6a11cb,#2575fc); border:none; color:#fff; }
+  .preview-btn.close { color:#ffb3b3; border-color:rgba(255,80,80,.3); }
+  .preview-btn.close:hover { background:rgba(255,60,60,.2); }
+  .preview-body { flex:1; overflow:auto; background:#0a0a18; display:flex; align-items:center; justify-content:center; min-height:300px; }
+  .preview-body iframe { width:100%; height:80vh; border:none; background:#fff; }
+  .preview-body img { max-width:100%; max-height:80vh; object-fit:contain; padding:20px; }
+  .preview-body video, .preview-body audio { max-width:100%; max-height:80vh; }
+  .preview-body pre { width:100%; padding:20px; color:#e9e9ff; direction:ltr; text-align:left; font-family:'Courier New', monospace; font-size:.85rem; line-height:1.7; white-space:pre-wrap; word-break:break-word; }
+  .preview-unsupported { padding:50px 20px; text-align:center; color:var(--muted); font-size:.95rem; line-height:1.9; }
+
+  .toast {
+    position:fixed; bottom:26px; left:50%;
+    transform:translate(-50%, 24px);
+    background:linear-gradient(135deg, rgba(30,30,55,.98), rgba(20,20,40,.98));
+    border:1px solid var(--border);
+    padding:14px 26px; border-radius:14px;
+    font-size:.9rem; font-weight:600;
+    box-shadow:0 15px 40px rgba(0,0,0,.6), 0 0 30px rgba(37,117,252,.25);
+    opacity:0; pointer-events:none;
+    transition:opacity .3s, transform .3s;
+    z-index:2000;
+    max-width:90vw;
+    direction:rtl;
+  }
+  .toast.show { opacity:1; transform:translate(-50%, 0); }
+  .toast.success { border-color:rgba(34,197,94,.5); }
+  .toast.error { border-color:rgba(255,80,80,.5); }
+
+  .chat-section { padding:60px 24px 100px; max-width:860px; margin:0 auto; }
+  .chat-intro { color:var(--muted); font-size:.92rem; line-height:1.9; margin-bottom:22px; }
+  .chat-window { background:linear-gradient(155deg, rgba(22,22,42,.95), rgba(12,12,26,.98)); border:1px solid var(--border); border-radius:24px; overflow:hidden; box-shadow:0 30px 70px rgba(0,0,0,.55),0 0 50px rgba(106,17,203,.15); position:relative; }
+  .chat-window::before { content:""; position:absolute; inset:0; border-radius:24px; padding:1px; background:linear-gradient(135deg, rgba(106,17,203,.5), transparent 40%, rgba(37,117,252,.5), transparent 80%, rgba(255,46,147,.5)); -webkit-mask:linear-gradient(#000 0 0) content-box,linear-gradient(#000 0 0); -webkit-mask-composite:xor; mask-composite:exclude; pointer-events:none; opacity:.8; }
+  .chat-header { display:flex; align-items:center; gap:14px; padding:18px 22px; background:linear-gradient(90deg, rgba(106,17,203,.18), rgba(37,117,252,.12)); border-bottom:1px solid var(--border); position:relative; z-index:1; }
+  .bot-avatar { width:46px; height:46px; border-radius:50%; background:linear-gradient(135deg,#6a11cb,#2575fc,#ff2e93); display:grid; place-items:center; font-size:1.4rem; box-shadow:0 0 24px rgba(37,117,252,.55); animation:avatarPulse 3s ease-in-out infinite; }
+  @keyframes avatarPulse { 0%,100% { box-shadow:0 0 24px rgba(37,117,252,.55); } 50% { box-shadow:0 0 34px rgba(255,46,147,.7); } }
+  .bot-info { flex:1; }
+  .bot-name { font-weight:700; font-size:.98rem; }
+  .bot-status { font-size:.75rem; color:#4ade80; display:inline-flex; align-items:center; gap:5px; margin-top:3px; }
+  .bot-status::before { content:""; width:7px; height:7px; border-radius:50%; background:#4ade80; box-shadow:0 0 10px #4ade80; animation:statusPulse 2s ease-in-out infinite; }
+  @keyframes statusPulse { 0%,100% { opacity:1; } 50% { opacity:.35; } }
+  .chat-reset { font-family:inherit; font-size:.78rem; color:#dcd6ff; background:var(--glass); border:1px solid var(--border); padding:7px 14px; border-radius:999px; cursor:pointer; transition:background .2s; }
+  .chat-reset:hover { background:rgba(255,255,255,.14); }
+  .chat-body { height:420px; overflow-y:auto; padding:22px; display:flex; flex-direction:column; gap:14px; scroll-behavior:smooth; position:relative; z-index:1; }
+  .chat-body::-webkit-scrollbar { width:6px; }
+  .chat-body::-webkit-scrollbar-thumb { background:rgba(106,17,203,.5); border-radius:3px; }
+  .msg { max-width:85%; padding:14px 18px; border-radius:18px; font-size:.9rem; line-height:1.75; animation:msgIn .4s cubic-bezier(.2,.9,.3,1.3); word-wrap:break-word; }
+  @keyframes msgIn { from { opacity:0; transform:translateY(14px) scale(.96); } to { opacity:1; transform:translateY(0) scale(1); } }
+  .msg.bot { align-self:flex-start; background:linear-gradient(145deg, rgba(35,35,60,.95), rgba(22,22,42,.95)); border:1px solid var(--border); border-bottom-right-radius:6px; color:#dde0f0; }
+  .msg.user { align-self:flex-end; background:linear-gradient(135deg,#6a11cb,#2575fc); border-bottom-left-radius:6px; color:#fff; box-shadow:0 8px 22px rgba(37,117,252,.35); }
+  .msg.bot .bot-lines { display:flex; flex-direction:column; gap:6px; margin-top:8px; }
+  .msg.bot .bot-line { padding:5px 0; border-bottom:1px dashed rgba(255,255,255,.06); opacity:0; transform:translateX(-8px); animation:lineIn .35s ease-out forwards; }
+  .msg.bot .bot-line:last-child { border-bottom:none; }
+  @keyframes lineIn { to { opacity:1; transform:translateX(0); } }
+  .msg.bot .num { display:inline-block; min-width:24px; color:#6ec0ff; font-weight:700; margin-left:4px; }
+  .typing { align-self:flex-start; display:inline-flex; gap:6px; padding:14px 20px; background:rgba(35,35,60,.95); border:1px solid var(--border); border-radius:18px; border-bottom-right-radius:6px; animation:msgIn .3s ease-out; }
+  .typing span { width:8px; height:8px; border-radius:50%; background:#6ec0ff; animation:typingBounce 1.2s infinite; }
+  .typing span:nth-child(2) { animation-delay:.2s; }
+  .typing span:nth-child(3) { animation-delay:.4s; }
+  @keyframes typingBounce { 0%,60%,100% { opacity:.3; transform:translateY(0); } 30% { opacity:1; transform:translateY(-6px); } }
+  .suggestions { padding:14px 22px 8px; display:flex; gap:8px; flex-wrap:wrap; border-top:1px solid var(--border); background:rgba(10,10,22,.6); position:relative; z-index:1; }
+  .chip { font-family:inherit; font-size:.78rem; font-weight:600; color:#dcd6ff; background:rgba(255,255,255,.06); border:1px solid var(--border); padding:8px 14px; border-radius:999px; cursor:pointer; transition:transform .2s, background .2s, border-color .2s; display:inline-flex; align-items:center; gap:6px; }
+  .chip:hover { transform:translateY(-2px); background:linear-gradient(135deg, rgba(106,17,203,.35), rgba(37,117,252,.35)); border-color:rgba(37,117,252,.7); }
+  .chip:disabled { opacity:.4; cursor:not-allowed; transform:none; }
+  .chat-input-area { display:flex; gap:10px; padding:14px 18px 18px; background:rgba(10,10,22,.8); border-top:1px solid var(--border); position:relative; z-index:1; }
+  #chatInput { flex:1; font-family:inherit; font-size:.92rem; color:#fff; background:rgba(255,255,255,.05); border:1px solid var(--border); border-radius:14px; padding:14px 18px; outline:none; transition:border-color .25s, box-shadow .25s; }
+  #chatInput::placeholder { color:#7f83a0; }
+  #chatInput:focus { border-color:rgba(37,117,252,.8); box-shadow:0 0 0 3px rgba(37,117,252,.2); background:rgba(255,255,255,.08); }
+  #sendBtn { font-family:inherit; font-weight:700; font-size:.92rem; color:#fff; padding:14px 26px; border-radius:14px; border:none; cursor:pointer; background:linear-gradient(135deg,#6a11cb,#2575fc); box-shadow:0 8px 22px rgba(37,117,252,.35); transition:transform .2s, box-shadow .2s; display:inline-flex; align-items:center; gap:6px; }
+  #sendBtn:hover { transform:translateY(-2px); box-shadow:0 12px 30px rgba(37,117,252,.5); }
+  #sendBtn:disabled { opacity:.5; cursor:not-allowed; transform:none; }
+
+  footer { text-align:center; padding:30px 20px; color:var(--muted); font-size:.85rem; border-top:1px solid var(--border); }
+  .reveal { opacity:0; transform:translateY(40px); transition:opacity .8s cubic-bezier(.2,.9,.3,1), transform .8s cubic-bezier(.2,.9,.3,1); }
+  .reveal.revealed { opacity:1; transform:translateY(0); }
+
+  @media (max-width:600px) {
+    .hero { padding:24px 16px; min-height:auto; }
+    .hero-title { font-size:2.5rem; }
+    .section, .files-section, .chat-section { padding:40px 16px; }
+    .editor-card { padding:14px; }
+    #codeInput { min-height:220px; }
+    .chat-body { height:360px; padding:16px; }
+    .msg { font-size:.85rem; }
+    #chatInput { padding:12px 14px; }
+    #sendBtn { padding:12px 18px; }
+    .drop-zone { padding:34px 18px; }
+    .drop-icon { font-size:2.6rem; }
+    .load-file-btn span { display:none; }
+    .load-file-btn { padding:8px 10px; }
+  }
+  @media (prefers-reduced-motion: reduce) {
+    *, *::before, *::after {
+      animation-duration:.01ms !important;
+      animation-iteration-count:1 !important;
+      transition-duration:.01ms !important;
+    }
+  }
+</style>
+</head>
+<body>
+
+<div class="bg-orbs"><div class="orb orb-1"></div><div class="orb orb-2"></div><div class="orb orb-3"></div></div>
+<div class="particles" id="particles"></div>
+
+<section class="hero">
+  <div class="hero-grid">
+    <div class="hero-text reveal">
+      <div class="badge">✦ خوش آمدید</div>
+      <h1 class="hero-title"><span class="wave">سلام</span><span class="grad">دنیای کد</span></h1>
+      <p class="hero-sub">کدت رو بنویس، فایل بارگذاری کن یا از نمونه‌ها استفاده کن. کادر کد به اندازه‌ی محتوا قد می‌کشه، بعد اجرا بزن.</p>
+      <div class="feature-list">
+        <span class="feature-chip">⚡ اجرای سریع</span>
+        <span class="feature-chip">📏 رشد خودکار ادیتور</span>
+        <span class="feature-chip">📂 بارگذاری فایل</span>
+        <span class="feature-chip">🤖 دستیار آموزشی</span>
+      </div>
+    </div>
+
+    <div class="editor-card reveal" id="editorCard">
+      <div class="editor-head">
+        <span>📝 کدت رو بنویس</span>
+        <div class="editor-tools">
+          <button class="load-file-btn" id="loadFileBtn" title="بارگذاری فایل کد">📂 <span>فایل</span></button>
+          <div class="mini-samples">
+            <button class="mini-btn" data-sample="palette" title="پالت رنگ">🎨</button>
+            <button class="mini-btn" data-sample="clock" title="ساعت">🕐</button>
+            <button class="mini-btn" data-sample="balls" title="توپ‌ها">⚽</button>
+            <button class="mini-btn" data-sample="gradient" title="گرادیان">✨</button>
+          </div>
+        </div>
+      </div>
+
+      <input type="file" id="editorFileInput" accept=".html,.htm,.js,.css,.txt,.json,.md,.xml,.svg,text/*" hidden>
+
+      <div class="detect-badge" id="detectBadge">
+        <span class="dot" id="detectDot"></span>
+        <span id="detectLabel">—</span>
+      </div>
+
+      <textarea id="codeInput" spellcheck="false" placeholder="<!DOCTYPE html>
+<html>
+  <body>
+    <h1>Hello World!</h1>
+  </body>
+</html>"></textarea>
+
+      <div class="editor-actions">
+        <button id="runBtn" class="btn-run">▶ اجرای کد</button>
+        <button id="clearBtn" class="btn-clear">🗑 پاک</button>
+        <span class="char-count" id="charCount">
+          <span class="stat">📝 <span class="v" id="lineStat">0</span> خط</span>
+          <span class="stat">💬 <span class="v" id="charStat">0</span> کاراکتر</span>
+          <span class="stat">📦 <span class="v" id="sizeStat">0</span> KB</span>
+        </span>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section class="section reveal" id="outputSection">
+  <h2 class="section-title">خروجی اجرا</h2>
+  <div class="iframe-wrap" id="iframeWrap">
+    <div class="output-empty" id="outputEmpty">
+      <div><div class="icon">⌨️</div><div>کدت رو بنویس یا فایل بارگذاری کن، بعد «اجرا» بزن</div></div>
+    </div>
+  </div>
+</section>
+
+<section class="files-section reveal" id="filesSection">
+  <h2 class="section-title">📁 فایل‌های ذخیره شده</h2>
+  <p class="files-intro">
+    هر فایلی (HTML، JS، CSS، عکس، PDF و...) رو اینجا بنداز یا کلیک کن تا انتخاب کنی. فایل‌های متنی خودکار شناسایی و در ادیتور بالا بارگذاری می‌شن؛ کادر کد هم به اندازه‌ی محتوا رشد می‌کنه.
+  </p>
+
+  <label class="drop-zone" id="dropZone">
+    <div class="drop-icon">📤</div>
+    <div class="drop-text">فایل رو اینجا بنداز</div>
+    <div class="drop-hint">یا کلیک کن تا انتخاب کنی — چند فایل همزمان هم پشتیبانی می‌شه</div>
+    <input type="file" id="fileInput" multiple>
+  </label>
+
+  <div class="files-grid" id="filesGrid">
+    <div class="files-empty">هنوز فایلی ذخیره نکردی 🗂</div>
+  </div>
+</section>
+
+<div class="preview-overlay" id="previewOverlay">
+  <div class="preview-box">
+    <div class="preview-head">
+      <div class="preview-name" id="previewName">file</div>
+      <div class="preview-actions">
+        <button class="preview-btn primary" id="previewLoad">📝 لود در ادیتور</button>
+        <button class="preview-btn" id="previewDownload">⬇ دانلود</button>
+        <button class="preview-btn close" id="previewClose">✕ بستن</button>
+      </div>
+    </div>
+    <div class="preview-body" id="previewBody"></div>
+  </div>
+</div>
+
+<section class="chat-section reveal" id="chatSection">
+  <h2 class="section-title">🤖 دستیار یادگیری کدنویسی</h2>
+  <p class="chat-intro">هر سوالی درباره یادگیری برنامه‌نویسی داری همین‌جا بپرس. یا از گزینه‌های پیشنهادی پایین یکی رو بزن 👇</p>
+  <div class="chat-window">
+    <div class="chat-header">
+      <div class="bot-avatar">🤖</div>
+      <div class="bot-info"><div class="bot-name">دستیار کدنویسی</div><div class="bot-status">آنلاین</div></div>
+      <button class="chat-reset" id="chatReset">↻ گفتگوی جدید</button>
+    </div>
+    <div class="chat-body" id="chatBody"></div>
+    <div class="suggestions" id="suggestions"></div>
+    <div class="chat-input-area">
+      <input type="text" id="chatInput" placeholder="سوال بپرس..." autocomplete="off" />
+      <button id="sendBtn">ارسال ➤</button>
+    </div>
+  </div>
+</section>
+
+<footer>ساخته‌شده با 💜 برای یادگیری برنامه‌نویسی</footer>
+
+<div class="toast" id="toast"></div>
+
+<script>
+/* ==================== ذرات ==================== */
+(function () {
+  const c = document.getElementById('particles');
+  for (let i = 0; i < 30; i++) {
+    const p = document.createElement('div');
+    p.className = 'particle';
+    const s = 2 + Math.random() * 4;
+    p.style.width = s + 'px';
+    p.style.height = s + 'px';
+    p.style.left = Math.random() * 100 + '%';
+    p.style.animationDelay = (Math.random() * 25) + 's';
+    p.style.animationDuration = (18 + Math.random() * 20) + 's';
+    c.appendChild(p);
+  }
+})();
+
+/* ==================== توست ==================== */
+const toastEl = document.getElementById('toast');
+let toastTimer;
+function showToast(msg, type) {
+  toastEl.textContent = msg;
+  toastEl.className = 'toast show' + (type ? ' ' + type : '');
+  clearTimeout(toastTimer);
+  toastTimer = setTimeout(() => toastEl.classList.remove('show'), 2800);
+}
+
+/* ==================== نمونه‌ها ==================== */
+const SAMPLES = {
+  palette: `<!DOCTYPE html>
+<html><head><style>
+body{margin:0;background:#111122;color:#fff;font-family:sans-serif;min-height:100vh;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:20px}
+h2{margin-bottom:20px}
+.palette{display:grid;grid-template-columns:repeat(5,1fr);gap:10px;width:100%;max-width:700px;margin-bottom:20px}
+.sw{height:160px;border-radius:16px;cursor:pointer;display:flex;align-items:flex-end;justify-content:center;padding:10px;transition:transform .2s;box-shadow:0 6px 18px rgba(0,0,0,.4)}
+.sw:hover{transform:translateY(-6px)}
+.sw span{font-family:monospace;font-size:.8rem;background:rgba(0,0,0,.5);padding:4px 8px;border-radius:6px;direction:ltr}
+.btn{padding:14px 34px;font-size:1rem;font-weight:bold;color:#fff;border:none;border-radius:99px;cursor:pointer;background:linear-gradient(135deg,#6a11cb,#2575fc,#ff2e93);background-size:200% 200%}
+</style></head><body>
+<h2>🎨 پالت رنگ تصادفی</h2><div class="palette" id="p"></div>
+<button class="btn" id="g">پالت جدید</button>
+<script>
+const P=document.getElementById('p');
+function h2h(h,s,l){s/=100;l/=100;const k=n=>(n+h/30)%12,a=s*Math.min(l,1-l),f=n=>l-a*Math.max(-1,Math.min(k(n)-3,Math.min(9-k(n),1))),x=v=>Math.round(255*v).toString(16).padStart(2,'0');return '#'+x(f(0))+x(f(8))+x(f(4))}
+function gen(){P.innerHTML='';const b=Math.random()*360;for(let i=0;i<5;i++){const hex=h2h(b+i*72+Math.random()*20-10,70+Math.random()*20,45+Math.random()*20);const d=document.createElement('div');d.className='sw';d.style.background=hex;d.innerHTML='<span>'+hex.toUpperCase()+'</span>';P.appendChild(d)}}
+document.getElementById('g').onclick=gen;gen();
+<\/script></body></html>`,
+
+  clock: `<!DOCTYPE html>
+<html><head><style>
+body{margin:0;min-height:100vh;display:grid;place-items:center;background:#0b0b18;color:#fff;font-family:monospace}
+#t{font-size:clamp(2rem,12vw,7rem);font-weight:bold;background:linear-gradient(90deg,#6a11cb,#2575fc,#ff2e93,#6a11cb);background-size:300% 100%;-webkit-background-clip:text;background-clip:text;color:transparent;letter-spacing:3px;animation:g 4s linear infinite;filter:drop-shadow(0 0 30px rgba(37,117,252,.5))}
+@keyframes g{to{background-position:300% 0}}
+</style></head><body>
+<div id="t">--:--:--</div>
+<script>
+function tick(){var d=new Date();document.getElementById('t').textContent=String(d.getHours()).padStart(2,'0')+':'+String(d.getMinutes()).padStart(2,'0')+':'+String(d.getSeconds()).padStart(2,'0')}
+tick();setInterval(tick,1000);
+<\/script></body></html>`,
+
+  balls: `<!DOCTYPE html>
+<html><head><style>body{margin:0;background:#0b0b18;overflow:hidden}canvas{display:block}</style></head>
+<body><canvas id="c"></canvas>
+<script>
+var c=document.getElementById('c'),ctx=c.getContext('2d');
+function rs(){c.width=innerWidth;c.height=innerHeight}
+rs();addEventListener('resize',rs);
+var B=[];for(var i=0;i<50;i++)B.push({x:Math.random()*c.width,y:Math.random()*c.height,vx:(Math.random()-.5)*4,vy:(Math.random()-.5)*4,r:6+Math.random()*18,h:Math.random()*360});
+function loop(){ctx.fillStyle='rgba(11,11,24,.18)';ctx.fillRect(0,0,c.width,c.height);B.forEach(function(b){b.x+=b.vx;b.y+=b.vy;if(b.x<b.r||b.x>c.width-b.r)b.vx*=-1;if(b.y<b.r||b.y>c.height-b.r)b.vy*=-1;ctx.beginPath();ctx.arc(b.x,b.y,b.r,0,Math.PI*2);ctx.fillStyle='hsl('+b.h+',80%,60%)';ctx.fill();b.h=(b.h+.5)%360});requestAnimationFrame(loop)}
+loop();
+<\/script></body></html>`,
+
+  gradient: `<!DOCTYPE html>
+<html><head><style>
+body{margin:0;min-height:100vh;display:grid;place-items:center;background:#0b0b18;font-family:sans-serif}
+h1{font-size:clamp(2rem,10vw,7rem);font-weight:900;background:linear-gradient(90deg,#ff2e93,#6a11cb,#2575fc,#ff2e93);background-size:300% 100%;-webkit-background-clip:text;background-clip:text;color:transparent;animation:g 4s linear infinite;filter:drop-shadow(0 0 40px rgba(106,17,203,.6))}
+@keyframes g{to{background-position:300% 0}}
+</style></head><body><h1>سلام دنیا</h1></body></html>`
+};
+
+/* ==================== DOM ==================== */
+const codeInput = document.getElementById('codeInput');
+const runBtn = document.getElementById('runBtn');
+const clearBtn = document.getElementById('clearBtn');
+const editorCard = document.getElementById('editorCard');
+const iframeWrap = document.getElementById('iframeWrap');
+const loadFileBtn = document.getElementById('loadFileBtn');
+const editorFileInput = document.getElementById('editorFileInput');
+const detectBadge = document.getElementById('detectBadge');
+const detectLabel = document.getElementById('detectLabel');
+const detectDot = document.getElementById('detectDot');
+const lineStat = document.getElementById('lineStat');
+const charStat = document.getElementById('charStat');
+const sizeStat = document.getElementById('sizeStat');
+
+/* ==================== 🎯 رشد خودکار تکست‌اریا ==================== */
+const MIN_H = 280;
+function autoResizeTextarea() {
+  // ابتدا ارتفاع خودکار تا scrollHeight واقعی محاسبه بشه
+  codeInput.style.height = 'auto';
+  const naturalHeight = codeInput.scrollHeight;
+  const maxHeight = Math.min(window.innerHeight * 0.85, 2400);
+  const finalHeight = Math.max(MIN_H, Math.min(naturalHeight + 4, maxHeight));
+
+  codeInput.style.height = finalHeight + 'px';
+  codeInput.style.overflowY = (naturalHeight + 4 > maxHeight) ? 'auto' : 'hidden';
+}
+
+function flashEditorGrowth() {
+  editorCard.classList.remove('growing');
+  void editorCard.offsetWidth;
+  editorCard.classList.add('growing');
+  setTimeout(() => editorCard.classList.remove('growing'), 750);
+}
+
+/* ==================== شمارنده‌ها ==================== */
+function updateStats() {
+  const text = codeInput.value;
+  const lines = text ? text.split(/\r\n|\r|\n/).length : 0;
+  const chars = text.length;
+  const bytes = new Blob([text]).size;
+  const kb = (bytes / 1024).toFixed(bytes < 1024 ? 2 : 1);
+
+  lineStat.textContent = lines.toLocaleString('en');
+  charStat.textContent = chars.toLocaleString('en');
+  sizeStat.textContent = kb;
+}
+
+/* ==================== تنظیم متن + رشد ==================== */
+function setCode(text, { flash = false, scroll = false } = {}) {
+  codeInput.value = text;
+  updateStats();
+  // دو requestAnimationFrame تا مطمئن بشیم layout به‌روز شده
+  requestAnimationFrame(() => {
+    requestAnimationFrame(() => {
+      autoResizeTextarea();
+      if (flash) flashEditorGrowth();
+      if (scroll) {
+        editorCard.scrollIntoView({ behavior: 'smooth', block: 'start' });
+      }
+    });
+  });
+}
+
+codeInput.addEventListener('input', () => {
+  updateStats();
+  autoResizeTextarea();
+  saveCurrentCode();
+});
+
+window.addEventListener('resize', autoResizeTextarea);
+
+/* ==================== شناسایی نوع کد ==================== */
+function detectType(name, content) {
+  const n = (name || '').toLowerCase().trim();
+  const c = (content || '').trim();
+
+  if (!c) return { type: 'empty', label: 'خالی', icon: '⬜', color: '#a9adc7' };
+
+  const isPalette = /palette|hslToHex|swatch|پالت|hsl\s*\(/i.test(c);
+
+  if (/<!DOCTYPE/i.test(c) || /<html[\s>]/i.test(c) || n.endsWith('.html') || n.endsWith('.htm')) {
+    if (isPalette) return { type: 'palette-html', label: 'کد پالت (HTML)', icon: '🎨', color: '#ff2e93' };
+    return { type: 'html', label: 'HTML', icon: '🌐', color: '#2575fc' };
+  }
+  if (n.endsWith('.js') || /^(function|const|let|var|import|export|class|async)\s/m.test(c) || /=>\s*\{/.test(c)) {
+    if (isPalette) return { type: 'palette-js', label: 'کد پالت (JS)', icon: '🎨', color: '#ff2e93' };
+    return { type: 'js', label: 'JavaScript', icon: '⚡', color: '#f59e0b' };
+  }
+  if (n.endsWith('.css') || (/^[.#\w\s,:>\[\]="'-]+\{[^}]*:[^}]+\}/m.test(c) && !/<html/i.test(c))) {
+    return { type: 'css', label: 'CSS', icon: '🎨', color: '#8b5cf6' };
+  }
+  if (n.endsWith('.json') || (c.startsWith('{') && c.endsWith('}') && c.includes(':'))) {
+    return { type: 'json', label: 'JSON', icon: '🧩', color: '#22c55e' };
+  }
+  if (/<\/[a-z][^>]*>/i.test(c)) {
+    if (isPalette) return { type: 'palette-html', label: 'کد پالت (HTML)', icon: '🎨', color: '#ff2e93' };
+    return { type: 'html-fragment', label: 'HTML (قطعه)', icon: '🌐', color: '#2575fc' };
+  }
+  return { type: 'text', label: 'متن', icon: '📄', color: '#a9adc7' };
+}
+
+function showDetectBadge(info) {
+  detectLabel.textContent = info.icon + ' ' + info.label + ' شناسایی شد';
+  detectDot.style.background = info.color;
+  detectBadge.style.borderColor = info.color + '55';
+  detectBadge.classList.remove('show');
+  void detectBadge.offsetWidth;
+  detectBadge.classList.add('show');
+}
+
+/* ==================== نمونه‌ها ==================== */
+document.querySelectorAll('.mini-btn').forEach(btn => {
+  btn.addEventListener('click', () => {
+    const key = btn.dataset.sample;
+    if (SAMPLES[key]) {
+      setCode(SAMPLES[key], { flash: true });
+      const info = detectType('', SAMPLES[key]);
+      showDetectBadge(info);
+      saveCurrentCode();
+      showToast('✅ نمونه «' + key + '» بارگذاری شد', 'success');
+    }
+  });
+});
+
+/* ==================== بارگذاری فایل در ادیتور ==================== */
+loadFileBtn.addEventListener('click', (e) => {
+  e.preventDefault();
+  e.stopPropagation();
+  editorFileInput.click();
+});
+
+editorFileInput.addEventListener('change', async (e) => {
+  const file = e.target.files[0];
+  if (!file) return;
+  await loadFileIntoEditor(file);
+  editorFileInput.value = '';
+});
+
+async function loadFileIntoEditor(file) {
+  try {
+    const isBinary = /^(image|video|audio|application\/pdf|application\/zip)/i.test(file.type);
+    if (isBinary) {
+      showToast('⚠️ این نوع فایل متنی نیست — از بخش «فایل‌های ذخیره شده» استفاده کن', 'error');
+      return;
+    }
+
+    const text = await file.text();
+    setCode(text, { flash: true, scroll: true });
+
+    const info = detectType(file.name, text);
+    showDetectBadge(info);
+
+    await dbAddFile({
+      name: file.name,
+      size: file.size,
+      type: file.type || 'text/plain',
+      blob: file,
+      date: Date.now()
+    });
+    await renderFiles();
+
+    saveCurrentCode();
+
+    const kb = (file.size / 1024).toFixed(1);
+    showToast('✅ «' + file.name + '» (' + kb + ' KB) بارگذاری شد — ' + info.icon + ' ' + info.label, 'success');
+  } catch (err) {
+    console.error(err);
+    showToast('❌ خطا در بارگذاری: ' + err.message, 'error');
+  }
+}
+
+/* ==================== اجرا ==================== */
+let outputFrame = null;
+
+function buildFinalHtml(code, info) {
+  if (info.type === 'html' || info.type === 'palette-html') return code;
+
+  if (info.type === 'html-fragment') {
+    return `<!DOCTYPE html><html lang="fa" dir="rtl"><head><meta charset="UTF-8"></head><body>${code}</body></html>`;
+  }
+  if (info.type === 'js' || info.type === 'palette-js') {
+    return `<!DOCTYPE html><html lang="fa" dir="rtl"><head><meta charset="UTF-8">
+    <style>body{font-family:monospace;background:#0a0a18;color:#e9e9ff;padding:20px;direction:ltr;text-align:left;line-height:1.7}</style>
+    </head><body>
+    <pre id="__err" style="color:#ff5b5b;margin-bottom:10px"></pre>
+    <script>
+      window.onerror=function(m,s,l){document.getElementById('__err').textContent='⚠ Error: '+m+' (line '+l+')';return false;};
+      try { ${code} } catch(e) { document.getElementById('__err').textContent='⚠ Error: '+e.message; }
+    <\/script></body></html>`;
+  }
+  if (info.type === 'css') {
+    return `<!DOCTYPE html><html lang="fa" dir="rtl"><head><meta charset="UTF-8"><style>${code}</style></head>
+    <body><div style="padding:20px;font-family:sans-serif"><h1>پیش‌نمایش CSS</h1><p>یک پاراگراف نمونه.</p><button>دکمه نمونه</button><div class="box" style="padding:20px;margin-top:20px;background:#eee;color:#333">جعبه نمونه</div></div></body></html>`;
+  }
+  if (info.type === 'json') {
+    let pretty = code;
+    try { pretty = JSON.stringify(JSON.parse(code), null, 2); } catch(e) {}
+    return `<!DOCTYPE html><html><head><meta charset="UTF-8"><style>body{background:#0a0a18;color:#e9e9ff;font-family:monospace;padding:20px;direction:ltr;text-align:left;}</style></head><body><pre>${pretty.replace(/</g,'&lt;')}</pre></body></html>`;
+  }
+  return `<!DOCTYPE html><html lang="fa" dir="rtl"><head><meta charset="UTF-8"><style>body{background:#0a0a18;color:#e9e9ff;font-family:monospace;padding:20px;white-space:pre-wrap;direction:ltr;text-align:left;line-height:1.7}</style></head><body>${code.replace(/</g,'&lt;')}</body></html>`;
+}
+
+runBtn.addEventListener('click', () => {
+  const code = codeInput.value.trim();
+  if (!code) {
+    codeInput.focus();
+    codeInput.style.borderColor = '#ff2e93';
+    codeInput.style.boxShadow = '0 0 0 3px rgba(255,46,147,.3)';
+    setTimeout(() => { codeInput.style.borderColor = ''; codeInput.style.boxShadow = ''; }, 900);
+    showToast('⚠️ اول یه کد بنویس یا فایل بارگذاری کن', 'error');
+    return;
+  }
+  const info = detectType('', code);
+  showDetectBadge(info);
+  const finalHtml = buildFinalHtml(code, info);
+
+  iframeWrap.innerHTML = '';
+  outputFrame = document.createElement('iframe');
+  outputFrame.setAttribute('sandbox', 'allow-scripts allow-forms allow-modals allow-popups');
+  outputFrame.setAttribute('title', 'خروجی اجرا');
+  outputFrame.srcdoc = finalHtml;
+  iframeWrap.appendChild(outputFrame);
+
+  saveCurrentCode();
+
+  setTimeout(() => {
+    document.getElementById('outputSection').scrollIntoView({ behavior: 'smooth', block: 'start' });
+  }, 200);
+
+  showToast('▶ کد اجرا شد — ' + info.icon + ' ' + info.label, 'success');
+});
+
+clearBtn.addEventListener('click', () => {
+  setCode('', { scroll: false });
+  detectBadge.classList.remove('show');
+  iframeWrap.innerHTML = `
+    <div class="output-empty">
+      <div><div class="icon">⌨️</div><div>کدت رو بنویس یا فایل بارگذاری کن، بعد «اجرا» بزن</div></div>
+    </div>`;
+  outputFrame = null;
+  saveCurrentCode();
+  codeInput.focus();
+  setTimeout(autoResizeTextarea, 50);
+});
+
+/* ==================== localStorage ==================== */
+const STORAGE_KEY = 'codeworld_current_code';
+function saveCurrentCode() {
+  try { localStorage.setItem(STORAGE_KEY, codeInput.value); } catch(e) {}
+}
+function restoreCurrentCode() {
+  try {
+    const saved = localStorage.getItem(STORAGE_KEY);
+    if (saved && saved.trim()) {
+      setCode(saved, { flash: false });
+      const info = detectType('', saved);
+      showDetectBadge(info);
+    } else {
+      autoResizeTextarea();
+    }
+  } catch(e) {
+    autoResizeTextarea();
+  }
+}
+
+/* ==================== IndexedDB ==================== */
+const DB_NAME = 'codeworld_files_db';
+const DB_VERSION = 1;
+const STORE = 'files';
+let dbPromise = null;
+
+function openDB() {
+  if (dbPromise) return dbPromise;
+  dbPromise = new Promise((resolve, reject) => {
+    const req = indexedDB.open(DB_NAME, DB_VERSION);
+    req.onupgradeneeded = (e) => {
+      const db = e.target.result;
+      if (!db.objectStoreNames.contains(STORE)) {
+        db.createObjectStore(STORE, { keyPath: 'id', autoIncrement: true });
+      }
+    };
+    req.onsuccess = () => resolve(req.result);
+    req.onerror = () => reject(req.error);
+  });
+  return dbPromise;
+}
+function dbAddFile(record) {
+  return openDB().then(db => new Promise((resolve, reject) => {
+    const tx = db.transaction(STORE, 'readwrite');
+    const req = tx.objectStore(STORE).add(record);
+    req.onsuccess = () => resolve(req.result);
+    req.onerror = () => reject(req.error);
+  }));
+}
+function dbGetAllFiles() {
+  return openDB().then(db => new Promise((resolve, reject) => {
+    const tx = db.transaction(STORE, 'readonly');
+    const req = tx.objectStore(STORE).getAll();
+    req.onsuccess = () => resolve(req.result || []);
+    req.onerror = () => reject(req.error);
+  }));
+}
+function dbDeleteFile(id) {
+  return openDB().then(db => new Promise((resolve, reject) => {
+    const tx = db.transaction(STORE, 'readwrite');
+    const req = tx.objectStore(STORE).delete(id);
+    req.onsuccess = () => resolve();
+    req.onerror = () => reject(req.error);
+  }));
+}
+
+function formatSize(bytes) {
+  if (bytes < 1024) return bytes + ' B';
+  if (bytes < 1024 * 1024) return (bytes / 1024).toFixed(1) + ' KB';
+  return (bytes / (1024 * 1024)).toFixed(2) + ' MB';
+}
+function iconFor(type, name) {
+  const t = (type || '').toLowerCase();
+  const n = (name || '').toLowerCase();
+  if (t.startsWith('image/')) return '🖼️';
+  if (t.startsWith('video/')) return '🎬';
+  if (t.startsWith('audio/')) return '🎵';
+  if (t === 'application/pdf' || n.endsWith('.pdf')) return '📕';
+  if (n.endsWith('.zip') || n.endsWith('.rar') || n.endsWith('.7z')) return '📦';
+  if (n.endsWith('.html') || n.endsWith('.htm')) return '🌐';
+  if (n.endsWith('.js')) return '⚡';
+  if (n.endsWith('.css')) return '🎨';
+  if (n.endsWith('.json')) return '🧩';
+  if (n.endsWith('.txt') || n.endsWith('.md')) return '📄';
+  if (t.startsWith('text/')) return '📄';
+  return '📎';
+}
+function isTextFile(type, name) {
+  const t = (type || '').toLowerCase();
+  const n = (name || '').toLowerCase();
+  if (t.startsWith('text/')) return true;
+  if (t === 'application/json' || t === 'application/javascript' || t === 'application/xml') return true;
+  if (/\.(html?|js|jsx|ts|tsx|css|scss|txt|md|json|xml|svg|ya?ml|py|java|c|cpp|cs|php|rb|go|rs|swift|kt|sql|sh|bat)$/i.test(n)) return true;
+  return false;
+}
+
+const dropZone = document.getElementById('dropZone');
+const fileInput = document.getElementById('fileInput');
+const filesGrid = document.getElementById('filesGrid');
+
+async function renderFiles() {
+  try {
+    const files = await dbGetAllFiles();
+    filesGrid.innerHTML = '';
+    if (!files.length) {
+      filesGrid.innerHTML = '<div class="files-empty">هنوز فایلی ذخیره نکردی 🗂</div>';
+      return;
+    }
+    files.forEach((f, idx) => {
+      const card = document.createElement('div');
+      card.className = 'file-card';
+      card.style.animationDelay = (idx * 60) + 'ms';
+
+      const top = document.createElement('div');
+      top.className = 'file-top';
+
+      const icon = document.createElement('div');
+      icon.className = 'file-icon';
+      icon.textContent = iconFor(f.type, f.name);
+      top.appendChild(icon);
+
+      const info = document.createElement('div');
+      info.className = 'file-info';
+      const nameEl = document.createElement('div');
+      nameEl.className = 'file-name';
+      nameEl.textContent = f.name;
+      nameEl.title = f.name;
+      info.appendChild(nameEl);
+
+      const meta = document.createElement('div');
+      meta.className = 'file-meta';
+      const date = new Date(f.date);
+      meta.innerHTML = `<span>${formatSize(f.size)}</span><span>${date.toLocaleDateString('fa-IR')}</span>`;
+      info.appendChild(meta);
+
+      top.appendChild(info);
+      card.appendChild(top);
+
+      const actions = document.createElement('div');
+      actions.className = 'file-actions';
+
+      if (isTextFile(f.type, f.name)) {
+        const loadBtn = document.createElement('button');
+        loadBtn.className = 'file-load';
+        loadBtn.textContent = '📝 لود';
+        loadBtn.addEventListener('click', async (e) => {
+          e.stopPropagation();
+          await loadStoredFileToEditor(f);
+        });
+        actions.appendChild(loadBtn);
+      }
+
+      const delBtn = document.createElement('button');
+      delBtn.className = 'file-delete';
+      delBtn.textContent = '🗑 حذف';
+      delBtn.addEventListener('click', async (e) => {
+        e.stopPropagation();
+        if (!confirm('فایل «' + f.name + '» حذف شود؟')) return;
+        await dbDeleteFile(f.id);
+        await renderFiles();
+        showToast('🗑 فایل حذف شد', 'success');
+      });
+      actions.appendChild(delBtn);
+      card.appendChild(actions);
+
+      card.addEventListener('click', async () => {
+        if (isTextFile(f.type, f.name)) {
+          await loadStoredFileToEditor(f);
+        } else {
+          previewFile(f);
+        }
+      });
+
+      filesGrid.appendChild(card);
+    });
+  } catch (err) {
+    console.error('renderFiles error:', err);
+    filesGrid.innerHTML = '<div class="files-empty">خطا در خواندن فایل‌ها: ' + err.message + '</div>';
+  }
+}
+
+async function loadStoredFileToEditor(f) {
+  try {
+    let text;
+    if (f.blob instanceof Blob) text = await f.blob.text();
+    else if (typeof f.text === 'string') text = f.text;
+    else throw new Error('محتوای فایل در دسترس نیست');
+
+    setCode(text, { flash: true, scroll: true });
+
+    const info = detectType(f.name, text);
+    showDetectBadge(info);
+    saveCurrentCode();
+
+    showToast('✅ «' + f.name + '» در ادیتور لود شد — ' + info.icon + ' ' + info.label, 'success');
+  } catch (err) {
+    showToast('❌ خطا: ' + err.message, 'error');
+  }
+}
+
+async function addFiles(fileList) {
+  const arr = Array.from(fileList);
+  if (!arr.length) return;
+  let okCount = 0, errCount = 0;
+  for (const file of arr) {
+    try {
+      await dbAddFile({
+        name: file.name,
+        size: file.size,
+        type: file.type || 'application/octet-stream',
+        blob: file,
+        date: Date.now()
+      });
+      okCount++;
+    } catch (err) {
+      console.error('addFile error:', err);
+      errCount++;
+    }
+  }
+  await renderFiles();
+  if (okCount && !errCount) showToast('✅ ' + okCount + ' فایل ذخیره شد', 'success');
+  else if (okCount && errCount) showToast('⚠️ ' + okCount + ' ذخیره شد، ' + errCount + ' خطا', 'error');
+  else if (errCount) showToast('❌ خطا در ذخیره فایل‌ها', 'error');
+}
+
+['dragenter', 'dragover'].forEach(ev => {
+  dropZone.addEventListener(ev, (e) => {
+    e.preventDefault(); e.stopPropagation();
+    dropZone.classList.add('dragover');
+  });
+});
+['dragleave', 'drop'].forEach(ev => {
+  dropZone.addEventListener(ev, (e) => {
+    e.preventDefault(); e.stopPropagation();
+    dropZone.classList.remove('dragover');
+  });
+});
+dropZone.addEventListener('drop', (e) => {
+  if (e.dataTransfer.files && e.dataTransfer.files.length) {
+    addFiles(e.dataTransfer.files);
+  }
+});
+window.addEventListener('dragover', (e) => e.preventDefault());
+window.addEventListener('drop', (e) => e.preventDefault());
+
+fileInput.addEventListener('change', (e) => {
+  if (e.target.files && e.target.files.length) addFiles(e.target.files);
+  fileInput.value = '';
+});
+
+/* ==================== پیش‌نمایش ==================== */
+const previewOverlay = document.getElementById('previewOverlay');
+const previewName = document.getElementById('previewName');
+const previewBody = document.getElementById('previewBody');
+const previewClose = document.getElementById('previewClose');
+const previewDownload = document.getElementById('previewDownload');
+const previewLoad = document.getElementById('previewLoad');
+
+let currentPreviewFile = null;
+
+function previewFile(f) {
+  currentPreviewFile = f;
+  previewName.textContent = f.name;
+  previewName.title = f.name;
+  previewBody.innerHTML = '';
+  previewLoad.style.display = isTextFile(f.type, f.name) ? '' : 'none';
+
+  const blob = f.blob;
+  const type = (f.type || '').toLowerCase();
+  const n = (f.name || '').toLowerCase();
+
+  if (type.startsWith('image/')) {
+    const url = URL.createObjectURL(blob);
+    const img = document.createElement('img');
+    img.src = url;
+    img.onload = () => URL.revokeObjectURL(url);
+    previewBody.appendChild(img);
+  } else if (type.startsWith('video/')) {
+    const url = URL.createObjectURL(blob);
+    const v = document.createElement('video');
+    v.src = url; v.controls = true;
+    previewBody.appendChild(v);
+  } else if (type.startsWith('audio/')) {
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('audio');
+    a.src = url; a.controls = true;
+    previewBody.appendChild(a);
+  } else if (type === 'application/pdf' || n.endsWith('.pdf')) {
+    const url = URL.createObjectURL(blob);
+    const iframe = document.createElement('iframe');
+    iframe.src = url;
+    previewBody.appendChild(iframe);
+  } else if (isTextFile(type, n)) {
+    const reader = new FileReader();
+    reader.onload = () => {
+      const text = reader.result;
+      if (n.endsWith('.html') || n.endsWith('.htm')) {
+        const iframe = document.createElement('iframe');
+        iframe.setAttribute('sandbox', 'allow-scripts allow-forms allow-modals allow-popups');
+        iframe.srcdoc = text;
+        previewBody.appendChild(iframe);
+      } else {
+        const pre = document.createElement('pre');
+        pre.textContent = text;
+        previewBody.appendChild(pre);
+      }
+    };
+    reader.readAsText(blob);
+  } else {
+    const div = document.createElement('div');
+    div.className = 'preview-unsupported';
+    div.innerHTML = 'پیش‌نمایش این نوع فایل ممکن نیست.<br>روی «⬇ دانلود» بزن تا فایل ذخیره بشه.';
+    previewBody.appendChild(div);
+  }
+
+  previewOverlay.classList.add('open');
+  document.body.style.overflow = 'hidden';
+}
+
+function closePreview() {
+  previewOverlay.classList.remove('open');
+  document.body.style.overflow = '';
+  setTimeout(() => { previewBody.innerHTML = ''; }, 300);
+  currentPreviewFile = null;
+}
+previewClose.addEventListener('click', closePreview);
+previewOverlay.addEventListener('click', (e) => {
+  if (e.target === previewOverlay) closePreview();
+});
+document.addEventListener('keydown', (e) => {
+  if (e.key === 'Escape' && previewOverlay.classList.contains('open')) closePreview();
+});
+previewDownload.addEventListener('click', () => {
+  if (!currentPreviewFile || !currentPreviewFile.blob) return;
+  const url = URL.createObjectURL(currentPreviewFile.blob);
+  const a = document.createElement('a');
+  a.href = url;
+  a.download = currentPreviewFile.name || 'file';
+  document.body.appendChild(a);
+  a.click();
+  document.body.removeChild(a);
+  setTimeout(() => URL.revokeObjectURL(url), 1000);
+});
+previewLoad.addEventListener('click', async () => {
+  if (currentPreviewFile) {
+    const f = currentPreviewFile;
+    closePreview();
+    await loadStoredFileToEditor(f);
+  }
+});
+
+/* ==================== شروع ==================== */
+renderFiles();
+restoreCurrentCode();
+
+/* ==================== چت‌بات ==================== */
+const BOT_DATA = [
+  { key:'learn', icon:'🎯', chip:'چطوری کدنویسی یاد بگیرم؟', keywords:['یاد بگیرم','یادگیری','چطور یاد','آموزش','برنامه‌نویسی یاد','شروع یادگیری','یادگیری کد'], answer:[
+    'اول هدف مشخص کن: وب، موبایل، بازی یا هوش مصنوعی',
+    'یک زبان ساده انتخاب کن مثل پایتون یا جاوااسکریپت',
+    'هر روز حداقل ۳۰ دقیقه تمرین کن، حتی کم',
+    'از منابع رایگان مثل freeCodeCamp استفاده کن',
+    'ویدیوهای یوتیوب رو ببین و همزمان کد بزن',
+    'کتاب Automate the Boring Stuff with Python رو بخون',
+    'هر تمرین رو خودت انجام بده، فقط نگاه نکن',
+    'پروژه‌های کوچک بساز مثل ماشین‌حساب یا ساعت',
+    'وقتی گیر کردی از گوگل و ChatGPT کمک بگیر',
+    'توی انجمن‌ها مثل Stack Overflow سوال بپرس',
+    'با Git و GitHub آشنا شو و کدت رو آپلود کن',
+    'در پروژه‌های متن‌باز مشارکت کن',
+    'الگوریتم و ساختار داده رو جدی بگیر',
+    'برای خودت وبلاگ فنی بنویس و یاد بگیر',
+    'توی مسابقات کدنویسی مثل Codeforces شرکت کن',
+    'با برنامه‌نویس‌های دیگه در ارتباط باش',
+    'کدهای حرفه‌ای‌ها رو بخون و تحلیل کن',
+    'پروژه واقعی انجام بده، نه فقط تمرین',
+    'صبور باش، برنامه‌نویسی ماراتنه نه دوی سرعت',
+    'از اشتباهاتت نترس، هر باگ یه درس جدیده'
+  ]},
+  { key:'start', icon:'🚀', chip:'از کجا شروع کنم؟', keywords:['از کجا','شروع کنم','اول چه','ابتدای','کدوم اول','مسیر شروع'], answer:[
+    'اول ببین چه حوزه‌ای برات جذاب‌تره',
+    'اگه وب دوست داری: HTML، CSS، JavaScript',
+    'اگه موبایل: Kotlin (اندروید) یا Swift (iOS)',
+    'اگه بازی: Unity با C# یا Unreal با C++',
+    'اگه هوش مصنوعی: Python و کتابخانه‌های ML',
+    'اگه تحلیل داده: Python با Pandas و SQL',
+    'برای شروع، پایتون بهترین گزینه‌ست',
+    'نصب یه ادیتور مثل VS Code یا PyCharm',
+    'اولین برنامه: چاپ «سلام دنیا»',
+    'بعد متغیرها و انواع داده یاد بگیر',
+    'شرط‌ها و حلقه‌ها رو تمرین کن',
+    'توابع و ماژول‌ها رو بفهم',
+    'برنامه‌نویسی شیءگرا (OOP) رو یاد بگیر',
+    'کار با فایل و دیتابیس رو تمرین کن',
+    'یه پروژه کوچیک بساز و تمومش کن',
+    'کدت رو روی گیت‌هاب بذار',
+    'از کامیونیتی کمک بخواه و کمک کن',
+    'هر روز تمرین کن حتی ۱۵ دقیقه',
+    'بعد ۳ ماه اولین پروژه واقعی رو شروع کن',
+    'مسیر یادگیری رو یادداشت کن که پیشرفتت رو ببینی'
+  ]},
+  { key:'language', icon:'💻', chip:'بهترین زبان برنامه‌نویسی چیه؟', keywords:['زبان','بهترین زبان','کدوم زبان','جاوااسکریپت','پایتون','جاوا','زبان برنامه‌نویسی','زبان انتخاب'], answer:[
+    'جواب کوتاه: بستگی به هدفت داره',
+    'برای تازه‌کارها: پایتون بهترینه',
+    'برای وب فرانت‌اند: HTML، CSS، JavaScript',
+    'برای وب بک‌اند: Node.js، Python، PHP',
+    'برای موبایل اندروید: Kotlin یا Java',
+    'برای موبایل iOS: Swift',
+    'برای بازی: C# (Unity) یا C++ (Unreal)',
+    'برای هوش مصنوعی: Python',
+    'برای علم داده: R یا Python',
+    'برای امنیت: Python و C',
+    'برای سیستم‌عامل: C و C++',
+    'برای بلاکچین: Solidity',
+    'برای دسکتاپ: C# (WPF) یا Java',
+    'برای DevOps: Bash و Python',
+    'برای رباتیک: C++ و Python',
+    'مهم‌ترین نکته: یه زبان رو عمیق یاد بگیر',
+    'بعد از تسلط، زبان دوم راحت‌تره',
+    'مفاهیم مشترکن: متغیر، حلقه، تابع، شیء',
+    'بازار کار ایران: جاوااسکریپت و پایتون داغه',
+    'بازار جهانی: TypeScript، Go، Rust پرطرفدارن'
+  ]},
+  { key:'resources', icon:'📚', chip:'منابع رایگان معرفی کن', keywords:['منبع','منابع','سایت','دوره','کتاب','رایگان','freecodecamp','یوتیوب','کتابخانه'], answer:[
+    'freeCodeCamp — دوره‌های کامل و رایگان',
+    'Codecademy — تمرین‌های تعاملی',
+    'W3Schools — مرجع عالی برای وب',
+    'MDN Web Docs — مستندات رسمی وب',
+    'The Odin Project — مسیر کامل وب',
+    'CS50 هاروارد — پایه علوم کامپیوتر',
+    'Khan Academy — ریاضی و CS',
+    'YouTube — کانال‌های آموزش برنامه‌نویسی',
+    'SoloLearn — اپلیکیشن موبایل یادگیری',
+    'HackerRank — تمرین کدنویسی',
+    'LeetCode — تمرین الگوریتم و مصاحبه',
+    'Codewars — چالش‌های کدنویسی جذاب',
+    'Exercism — تمرین با منتور رایگان',
+    'Stack Overflow — حل مشکلات کد',
+    'GitHub — پروژه‌های متن‌باز برای یادگیری',
+    'Dev.to — مقالات برنامه‌نویسی',
+    'Roadmap.sh — نقشه راه یادگیری هر حوزه',
+    'InterviewBit — آماده‌سازی مصاحبه شغلی',
+    'ChatGPT — کمک و توضیح مفاهیم',
+    'کتاب You Don\'t Know JS (رایگان آنلاین)'
+  ]},
+  { key:'duration', icon:'⏰', chip:'چقدر طول می‌کشه؟', keywords:['چقدر','مدت','زمان','طول می‌کشه','چند ماه','چند وقت','سریع'], answer:[
+    'بستگی به هدف، زمان روزانه و تلاش داره',
+    'برای شروع و مبانی: ۲ تا ۳ ماه',
+    'برای اولین پروژه واقعی: ۴ تا ۶ ماه',
+    'برای کارآموزی: ۶ تا ۹ ماه',
+    'برای اولین شغل: ۹ تا ۱۸ ماه',
+    'برای حرفه‌ای شدن: ۲ تا ۳ سال',
+    'روزی ۱ ساعت = حدود ۶ ماه تا پایه',
+    'روزی ۳ ساعت = حدود ۳ ماه تا پایه',
+    'روزی ۶ ساعت = حدود ۱.۵ ماه تا پایه',
+    'مهم‌تر از زمان، کیفیت تمرینه',
+    '۳۰ دقیقه تمرین متمرکز > ۳ ساعت پخش ویدئو',
+    'تمرین عملی حیاتی‌تر از دیدن ویدئوعه',
+    'هر کسی سرعت خودش رو داره، مقایسه نکن',
+    'پیشرفت خودت رو با دیروز مقایسه کن',
+    'پروژه واقعی سرعت یادگیری رو چند برابر می‌کنه',
+    'یادگیری هیچ‌وقت تموم نمی‌شه',
+    'حتی برنامه‌نویس‌های ۱۰ ساله هم یاد می‌گیرن',
+    'کلید موفقیت: استمرار و تمرین روزانه',
+    'از سفر لذت ببر، نه فقط مقصد',
+    'مهم‌ترین چیز: از یادگیری دست نکش'
+  ]},
+  { key:'skills', icon:'🛠', chip:'چه مهارت‌هایی لازمه؟', keywords:['مهارت','توانایی','لازم','نیاز','باید بدونم','پیش‌نیاز'], answer:[
+    'مهارت فنی: یک زبان برنامه‌نویسی عمیق',
+    'الگوریتم و ساختار داده',
+    'Git و کنترل نسخه',
+    'کار با ترمینال و خط فرمان',
+    'دیتابیس: SQL و NoSQL',
+    'API و وب سرویس‌ها',
+    'Debugging و حل مسئله',
+    'خواندن و فهمیدن کد دیگران',
+    'تست‌نویسی (Unit Test)',
+    'اصول امنیت در کدنویسی',
+    'مهارت نرم: صبر و استقامت',
+    'تفکر منطقی و تحلیلی',
+    'توانایی جستجوی مؤثر در گوگل',
+    'کار تیمی و ارتباط مؤثر',
+    'مدیریت زمان و تمرکز',
+    'یادگیری مستمر و به‌روز بودن',
+    'پذیرش نقد و بازخورد',
+    'کنجکاوی و پرسشگری',
+    'توانایی خواندن مستندات انگلیسی',
+    'تعادل بین یادگیری و عمل'
+  ]}
+];
+
+const chatBody = document.getElementById('chatBody');
+const chatInput = document.getElementById('chatInput');
+const sendBtn = document.getElementById('sendBtn');
+const suggestionsEl = document.getElementById('suggestions');
+const chatReset = document.getElementById('chatReset');
+let isBusy = false;
+const WELCOME = 'سلام! 👋 من دستیار یادگیری کدنویسی‌ام. هر سوالی داری همین‌جا بنویس یا از گزینه‌های پایین یکی رو انتخاب کن تا راهنمای کامل بدم.';
+
+function addUserMessage(text) {
+  const m = document.createElement('div');
+  m.className = 'msg user';
+  m.textContent = text;
+  chatBody.appendChild(m);
+  chatBody.scrollTop = chatBody.scrollHeight;
+}
+function addBotMessage(text) {
+  const m = document.createElement('div');
+  m.className = 'msg bot';
+  m.textContent = text;
+  chatBody.appendChild(m);
+  chatBody.scrollTop = chatBody.scrollHeight;
+}
+function addBotAnswer(lines) {
+  const m = document.createElement('div');
+  m.className = 'msg bot';
+  const header = document.createElement('div');
+  header.textContent = 'اینم راهنمای کامل:';
+  header.style.fontWeight = '700';
+  m.appendChild(header);
+  const wrap = document.createElement('div');
+  wrap.className = 'bot-lines';
+  m.appendChild(wrap);
+  chatBody.appendChild(m);
+  lines.forEach((line, i) => {
+    const l = document.createElement('div');
+    l.className = 'bot-line';
+    l.style.animationDelay = (i * 90) + 'ms';
+    l.innerHTML = `<span class="num">${i + 1}.</span>${line}`;
+    wrap.appendChild(l);
+    setTimeout(() => { chatBody.scrollTop = chatBody.scrollHeight; }, i * 90);
+  });
+}
+function showTyping() {
+  const t = document.createElement('div');
+  t.className = 'typing';
+  t.id = 'typingIndicator';
+  t.innerHTML = '<span></span><span></span><span></span>';
+  chatBody.appendChild(t);
+  chatBody.scrollTop = chatBody.scrollHeight;
+  return t;
+}
+function matchTopic(text) {
+  const clean = text.replace(/[؟?.,،!]/g, '').trim();
+  if (!clean) return null;
+  let best = null, bestScore = 0;
+  BOT_DATA.forEach(topic => {
+    let score = 0;
+    topic.keywords.forEach(kw => { if (clean.includes(kw)) score += kw.length; });
+    if (score > bestScore) { bestScore = score; best = topic; }
+  });
+  return bestScore > 0 ? best : null;
+}
+async function answerQuestion(q) {
+  if (isBusy) return;
+  isBusy = true; setInputEnabled(false);
+  addUserMessage(q);
+  const typing = showTyping();
+  await sleep(700 + Math.random() * 400);
+  typing.remove();
+  const topic = matchTopic(q);
+  if (topic) {
+    addBotAnswer(topic.answer);
+    await sleep(topic.answer.length * 90 + 200);
+  } else {
+    addBotMessage('متوجه نشدم 🤔 ولی می‌تونم تو این موضوعات کمک کنم. یکی از گزینه‌های پایین رو بزن یا واضح‌تر بپرس:');
+    const list = document.createElement('div');
+    list.className = 'msg bot';
+    list.style.padding = '10px 18px';
+    BOT_DATA.forEach(t => {
+      const item = document.createElement('div');
+      item.style.padding = '6px 0';
+      item.innerHTML = `${t.icon} <b>${t.chip}</b>`;
+      list.appendChild(item);
+    });
+    chatBody.appendChild(list);
+    chatBody.scrollTop = chatBody.scrollHeight;
+  }
+  isBusy = false; setInputEnabled(true); chatInput.focus();
+}
+function setInputEnabled(enabled) {
+  chatInput.disabled = !enabled;
+  sendBtn.disabled = !enabled;
+  document.querySelectorAll('.chip').forEach(c => c.disabled = !enabled);
+}
+function sleep(ms) { return new Promise(res => setTimeout(res, ms)); }
+function sendMessage() {
+  const text = chatInput.value.trim();
+  if (!text || isBusy) return;
+  chatInput.value = '';
+  answerQuestion(text);
+}
+sendBtn.addEventListener('click', sendMessage);
+chatInput.addEventListener('keydown', e => {
+  if (e.key === 'Enter') { e.preventDefault(); sendMessage(); }
+});
+
+BOT_DATA.forEach(topic => {
+  const chip = document.createElement('button');
+  chip.className = 'chip';
+  chip.innerHTML = `<span>${topic.icon}</span> ${topic.chip}`;
+  chip.addEventListener('click', () => { if (!isBusy) answerQuestion(topic.chip); });
+  suggestionsEl.appendChild(chip);
+});
+
+chatReset.addEventListener('click', () => {
+  chatBody.innerHTML = '';
+  addBotMessage(WELCOME);
+  setInputEnabled(true);
+});
+addBotMessage(WELCOME);
+
+const observer = new IntersectionObserver((entries) => {
+  entries.forEach(entry => {
+    if (entry.isIntersecting) entry.target.classList.add('revealed');
+  });
+}, { threshold: 0.08 });
+document.querySelectorAll('.reveal').forEach(el => observer.observe(el));
+</script>
+
+</body>
+</html>
